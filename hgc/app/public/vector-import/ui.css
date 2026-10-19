@@ -1,0 +1,58 @@
+#vector-import-dialog {
+  width: min(580px, calc(100% - 32px));
+}
+#vector-file {
+  height: auto;
+  padding: 10px;
+}
+#vector-file::file-selector-button {
+  background: #34413c;
+  color: #e8eee9;
+  border: 0;
+  border-radius: 4px;
+  padding: 7px 10px;
+  margin-right: 10px;
+  cursor: pointer;
+}
+.vector-import-options {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr 1fr;
+  gap: 12px;
+}
+.vector-import-options label {
+  margin-top: 15px;
+}
+.vector-import-options select {
+  display: block;
+  margin-top: 8px;
+  font-size: 12px;
+}
+#vector-preview {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: #101316;
+  border: 1px solid #374047;
+  border-radius: 6px;
+}
+#vector-warnings {
+  color: #e9c39c;
+  padding-left: 18px;
+  font-size: 12px;
+  line-height: 1.6;
+}
+#vector-import-dialog .error-text {
+  color: var(--error);
+}
+#vector-import-dialog [hidden] {
+  display: none;
+}
+@media (max-width: 460px) {
+  #vector-import-dialog {
+    padding: 20px;
+  }
+  .vector-import-options {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}

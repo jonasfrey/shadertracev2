@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#111519" />
+    <meta
+      name="description"
+      content="Compose signed distance fields, experiment with GLSL, and export shader animations."
+    />
+    <title>Shadertrace — a little shader studio</title>
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="Shadertrace home"
+        ><span class="brand-mark" aria-hidden="true">◎</span> shadertrace<span
+          class="brand-dot"
+          >.</span
+        ></a
+      >
+      <span class="tagline">A little shader studio</span>
+      <button class="quiet" id="help-button">
+        Shader guide <span aria-hidden="true">↗</span>
+      </button>
+    </header>
+
+    <main>
+      <div class="workspace-heading">
+        <div>
+          <span class="eyebrow">DISTANCE → FORM → MOTION</span>
+          <h1>Make a field of your own.</h1>
+        </div>
+        <span class="workspace-tag"
+          ><span class="status-dot"></span> Live workspace</span
+        >
+      </div>
+      <div id="notice" class="notice" role="status" hidden></div>
+      <div class="workspace">
+        <section class="preview-panel panel" aria-label="Shader preview">
+          <div class="panel-heading">
+            <span class="eyebrow">01 / CANVAS</span
+            ><span id="resolution-label" class="mono">2048 × 2048</span>
+          </div>
+          <div class="canvas-stage">
+            <canvas
+              id="preview"
+              width="2048"
+              height="2048"
+              aria-label="Live shader preview"
+            ></canvas
+            ><span class="canvas-tag">SIGNED DISTANCE FIELD</span>
+          </div>
+          <div class="transport">
+            <button
+              id="play-button"
+              class="transport-button"
+              aria-label="Pause animation"
+              title="Play or pause"
+            >
+              Ⅱ
+            </button>
+            <button
+              id="restart-button"
+              class="transport-button"
+              aria-label="Restart animation"
+              title="Restart"
+            >
+              ↺
+            </button>
+            <input
+              id="timeline"
+              type="range"
+              min="0"
+              max="6"
+              step="0.001"
+              value="0"
+              aria-label="Animation time"
+            />
+            <span id="time-label" class="mono">0.00 / 6.00 s</span>
+          </div>
+          <div class="canvas-footer">
+            <span id="compile-status" role="status"
+              ><span class="status-dot"></span> Starting renderer…</span
+            ><span class="mono">WebGL 2 / GLSL</span>
+          </div>
+        </section>
+
+        <section class="editor-panel panel" aria-label="Shader templates">
+          <div class="panel-heading">
+            <span class="eyebrow">02 / COMPOSE</span
+            ><span class="subtle">Edits render as you type</span>
+          </div>
+          <div class="editor-tabs" role="tablist" aria-label="Shader component">
+            <button
+              id="sdf-tab"
+              role="tab"
+              aria-controls="code-panel"
+              aria-selected="true"
+              data-kind="sdf"
+            >
+              <span>ƒ</span> SDF function
+            </button>
+            <button
+              id="visualization-tab"
+              role="tab"
+              aria-controls="code-panel"
+              aria-selected="false"
+              tabindex="-1"
+              data-kind="visualization"
+            >
+              <span>◉</span> Visualization
+            </button>
+          </div>
+          <div class="template-toolbar">
+            <label for="template-select" class="sr-only">Template</label
+            ><select id="template-select" disabled></select
+            ><button id="save-button" class="small-button" disabled>
+              ＋ Save a copy
+            </button>
+          </div>
+          <p id="template-description" class="template-description">
+            Loading your template library…
+          </p>
+          <div id="code-panel" role="tabpanel" aria-labelledby="sdf-tab">
+            <div id="editor">
+              <p class="editor-loading">Loading Monaco editor…</p>
+            </div>
+          </div>
+          <pre id="shader-errors" role="alert" hidden></pre>
+          <div class="editor-footer">
+            <span id="draft-status">Built-in template</span
+            ><span class="mono"
+              >GLSL <span class="footer-divider">/</span>
+              <span id="line-count">0 lines</span></span
+            >
+          </div>
+        </section>
+      </div>
+
+      <section class="export-panel panel" aria-label="Animation export">
+        <div class="export-intro">
+          <span class="eyebrow">03 / TAKE IT WITH YOU</span>
+          <h2>From pixels to playback.</h2>
+          <p>Render every frame. Keep every detail.</p>
+        </div>
+        <form id="export-form">
+          <fieldset id="export-settings">
+            <label
+              >Resolution<select id="resolution">
+                <option value="512">512 × 512</option>
+                <option value="1024">1024 × 1024</option>
+                <option value="2048" selected>2048 × 2048</option>
+                <option value="4096">4096 × 4096</option>
+              </select></label
+            >
+            <label
+              >Format<select id="format">
+                <option value="mp4">MP4 video</option>
+                <option value="gif">Animated GIF</option>
+                <option value="webm">WebM video</option>
+              </select></label
+            >
+            <label
+              >Duration<span class="input-unit"
+                ><input
+                  id="duration"
+                  type="number"
+                  min="0.1"
+                  max="30"
+                  step="0.1"
+                  value="6"
+                  required
+                  aria-label="Duration in seconds"
+                /><span>sec</span></span
+              ></label
+            >
+            <label
+              >Frame rate<select id="fps">
+                <option value="10">10 fps</option>
+                <option value="20">20 fps</option>
+                <option value="25">25 fps</option>
+                <option value="30" selected>30 fps</option>
+                <option value="50">50 fps</option>
+                <option value="60">60 fps</option>
+              </select></label
+            >
+          </fieldset>
+          <button class="primary" id="export-button" type="submit" disabled>
+            Export animation <span aria-hidden="true">↓</span>
+          </button>
+        </form>
+        <div class="export-bottom">
+          <span id="export-estimate"
+            >180 frames · full canvas resolution · starts at 0 s</span
+          ><span>Made with a little math.</span>
+        </div>
+        <div id="export-progress" hidden>
+          <div class="progress-row">
+            <span id="progress-label" role="status">Preparing export…</span
+            ><button id="cancel-export" class="quiet">Cancel</button>
+          </div>
+          <progress
+            id="progress"
+            max="1"
+            value="0"
+            aria-label="Export progress"
+          ></progress>
+        </div>
+        <div id="export-result" hidden>
+          <span>Your animation is ready.</span
+          ><a id="download-link" class="download-link">Download animation ↓</a>
+        </div>
+      </section>
+      <footer class="page-footer">
+        <span>One shape. Infinite possibilities.</span
+        ><span>SHADERTRACE / 001</span>
+      </footer>
+    </main>
+
+    <dialog id="save-dialog">
+      <form id="save-form">
+        <span class="eyebrow">YOUR TEMPLATE LIBRARY</span>
+        <h2>Keep this variation.</h2>
+        <p id="save-context">Save a new template to this server.</p>
+        <label for="template-name">Name</label
+        ><input
+          id="template-name"
+          maxlength="80"
+          required
+          autocomplete="off"
+          placeholder="My circle variation"
+        /><label for="template-note"
+          >Description <span class="subtle">(optional)</span></label
+        ><input
+          id="template-note"
+          maxlength="240"
+          placeholder="What makes this one different?"
+        />
+        <p id="save-error" class="error-text" role="alert"></p>
+        <div class="dialog-actions">
+          <button type="button" id="cancel-save" class="quiet">Cancel</button
+          ><button class="primary" id="confirm-save" type="submit">
+            Save template
+          </button>
+        </div>
+      </form>
+    </dialog>
+    <dialog id="help-dialog">
+      <span class="eyebrow">A SMALL GUIDE</span>
+      <h2>Two functions. One shader.</h2>
+      <p>
+        Pick a shape in <strong>SDF function</strong> and a look in
+        <strong>Visualization</strong>. Both templates are combined into the
+        live preview.
+      </p>
+      <dl>
+        <dt><code>float sdf(vec2 p)</code></dt>
+        <dd>
+          Return the distance from <code>p</code> to your shape. Negative is
+          inside; zero is the boundary. Coordinates span −1 to 1 along the
+          shorter canvas side.
+        </dd>
+        <dt><code>vec3 shade(vec2 p, float d)</code></dt>
+        <dd>
+          Turn the signed distance <code>d</code> into an RGB color. You can
+          call <code>sdf()</code> here, too.
+        </dd>
+      </dl>
+      <div class="uniforms">
+        <code>u_time</code><span>Time in seconds</span><code>u_resolution</code
+        ><span>Canvas size, vec2</span><code>u_duration</code
+        ><span>Loop length in seconds</span><code>u_frame</code
+        ><span>Frame number, int</span>
+      </div>
+      <p>
+        For a seamless loop, animate with
+        <code>sin(6.283185 * u_time / u_duration)</code>. Exports sample the
+        interval from zero up to the loop end, excluding the duplicate final
+        frame.
+      </p>
+      <p>
+        Switching templates keeps your edits during this session.
+        <strong>Save a copy</strong> adds a new template to the server library.
+        Compiler errors keep the last valid preview visible.
+      </p>
+      <p>
+        The visualization picker contains all
+        <strong>60 catalog styles</strong>, numbered and grouped by treatment.
+        3D surface and volume styles extrude your selected shape. Particle
+        disintegration uses a separate particle pass and works with scrubbing
+        and exports. For faster previews of flow, ray tracing, and volume
+        effects, try a 512 × 512 canvas.
+      </p>
+      <div class="dialog-actions">
+        <button id="close-help" class="primary">Got it</button>
+      </div>
+    </dialog>
+    <script src="/vendor/vs/loader.js"></script>
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

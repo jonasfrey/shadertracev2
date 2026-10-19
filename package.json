@@ -1,0 +1,21 @@
+{
+  "name": "shadertrace",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node hgc/app/server.js",
+    "dev": "node --watch hgc/app/server.js",
+    "test": "node --test hgc/app/tests/*.test.js",
+    "test:browser": "node tests/browser_smoke.mjs"
+  },
+  "dependencies": {
+    "monaco-editor": "0.52.2"
+  },
+  "devDependencies": {
+    "playwright-core": "1.56.1"
+  }
+}

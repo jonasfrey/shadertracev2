@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120">
+  <defs><path id="leaf" d="M0 0 C20 -40 60 -40 80 0 Q40 30 0 0Z"/></defs>
+  <use href="#leaf" transform="translate(50 55) rotate(-15)"/>
+  <path d="M20 90 A30 15 0 0 1 80 90 S120 115 170 90" fill="none" stroke="black" stroke-width="2"/>
+</svg>

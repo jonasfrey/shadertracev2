@@ -1,0 +1,4 @@
+node_modules/
+hgc/app/data/
+test-results/
+*.log
